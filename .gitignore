@@ -1,0 +1,36 @@
+# Python
+venv/
+
+.env
+
+# # FastAPI/Uvicorn logs
+# *.log
+
+# # VS Code settings (if you use it)
+# .vscode/
+
+# # Jupyter Notebook checkpoints (just in case)
+# .ipynb_checkpoints/
+
+# # Node
+# frontend/node_modules/
+# frontend/.env
+# frontend/dist/
+# frontend/build/
+
+
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# General
+*.bak
+*.swp
+*.tmp
+*.orig
+
+backend/credentials.json
+backend/token.json
+
+
