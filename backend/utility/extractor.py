@@ -175,19 +175,9 @@ def extract():
    print(service)
 
    emails=get_message_details(service)
+   return emails
 
-   for email in emails:
-       html_content=email['body']
-       soup = BeautifulSoup(html_content, "html.parser")
-       clean_html = soup.get_text()
-       print(clean_html)
-    #    with open("email_preview.html", "w", encoding="utf-8") as f:
-    #          f.write(html_content)
-       
-        
-       
-       
-       break
+
 
    # results=service.users().messages().list(userId='me').execute()
    # messagesdetails=results.get('messages')
@@ -271,5 +261,5 @@ def extract():
 
 
 
-if __name__ == "__main__":
-  extract()
+# if __name__ == "__main__":
+#   extract()

@@ -1,7 +1,30 @@
-from transformers import pipeline
+from transformers import pipeline,AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
-from langchain_huggingface import HuggingFacePipeline
-from langchain.prompts import PromptTemplate
+
+
+
+class AI_engine:
+    
+    def __init__(self):
+        summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+    
+    def summarize_facebook_bart(self,text:str,model:str)->str:
+        word_count=len(text.split())
+        if word_count<30:
+            return text
+        
+        
+        summary=self.summarizer(
+            text,
+            max_length=130,
+            min_length=30,
+            do_sample=False
+        )[0]['summary_text']
+
+        return summary
+    
+        
 
 # print(torch.cuda.is_available())
 # print(torch.cuda.get_device_name(0))
