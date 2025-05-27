@@ -6,6 +6,9 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from http import HTTPStatus
+from googleapiclient.discovery import build
+import base64
+from bs4 import BeautifulSoup
 
 
 
@@ -21,25 +24,22 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
 def authenticiate():
-  try:   
-       creds=None
-
-       if os.path.exists('token.json'):
-         creds=Credentials.from_authorized_user_file("token.json",SCOPES)
-       if not creds or not creds.valid:
-          if creds and creds.expired and creds.refresh_token:
-              creds.refresh(Request())
-          else:
-              flow=InstalledAppFlow.from_client_secrets_file(
-              'credentials.json',SCOPES
-              )
-              creds=flow.run_local_server(port=8080)
-          with open("token.json","w") as token:
-              token.write(creds.to_json())
-
-       return creds
-  except Exception as error:
-       print(f"Fail to authenticate")
+    try:
+        creds = None
+        if os.path.exists('token.json'):
+            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+                creds = flow.run_local_server(port=8080)
+            with open("token.json", "w") as token:
+                token.write(creds.to_json())
+        return creds
+    except Exception as error:
+        print(f"Fail to authenticate: {error}")
+        return None
 
 def api_call(credentials):
    try:
@@ -49,40 +49,40 @@ def api_call(credentials):
       print(f'An error occurered:{error}')
 
 
-def get_message_body(service,msg_id,user_id='me'):
-   try:
-      message=service.users().messages().get(
-         userId=user_id,id=msg_id,format='full'
-      ).execute()
+# def get_message_body(service,msg_id,user_id='me'):
+#    try:
+#       message=service.users().messages().get(
+#          userId=user_id,id=msg_id,format='full'
+#       ).execute()
 
-      payload=message.get('payload',{})
-      headers=payload.get('headers',[])
+#       payload=message.get('payload',{})
+#       headers=payload.get('headers',[])
 
-      # Extract the subject:
+#       # Extract the subject:
 
-      subject = next((h["value"] for h in headers if h["name"] == "Subject"), "No Subject")
-      sender = next((h["value"] for h in headers if h["name"] == "From"), "Unknown Sender")
+#       subject = next((h["value"] for h in headers if h["name"] == "Subject"), "No Subject")
+#       sender = next((h["value"] for h in headers if h["name"] == "From"), "Unknown Sender")
 
-      parts = payload.get("parts", [])
-      body = ""
+#       parts = payload.get("parts", [])
+#       body = ""
 
-      if parts:
-         for part in parts:
-            mime_type=part.get('mimeType',"")
-            body_data=part.get('body',{}).get('data',"")
+#       if parts:
+#          for part in parts:
+#             mime_type=part.get('mimeType',"")
+#             body_data=part.get('body',{}).get('data',"")
 
-            if mime_type=='text/plain':
-               body += base64.urlsafe_b64decode(body_data.encode("utf-8")).decode("utf-8")
-      else:
-         body_data=payload.get('body',{}).get('data',"")
-         if body_data:
-            body += base64.urlsafe_b64decode(body_data.encode("utf-8")).decode("utf-8")
+#             if mime_type=='text/plain':
+#                body += base64.urlsafe_b64decode(body_data.encode("utf-8")).decode("utf-8")
+#       else:
+#          body_data=payload.get('body',{}).get('data',"")
+#          if body_data:
+#             body += base64.urlsafe_b64decode(body_data.encode("utf-8")).decode("utf-8")
       
-      # # print(f"From: {sender}")
-      # print(f"Subject: {subject}")
-      print("-" * 50)
-      print(f"Body:\n{body}")
-      print("-" * 50)
+#       # # print(f"From: {sender}")
+#       # print(f"Subject: {subject}")
+#       print("-" * 50)
+#       print(f"Body:\n{body}")
+#       print("-" * 50)
       
             
             
@@ -90,24 +90,113 @@ def get_message_body(service,msg_id,user_id='me'):
 
       
 
-   except HttpError as error:
-      print(f'Error fetching messages:{error}')
+#    except HttpError as error:
+#       print(f'Error fetching messages:{error}')
 
-def main():
+
+def get_formatted_email_body(parts):
+    """
+    Recursively search parts to find 'text/html' version.
+    """
+    for part in parts:
+        mime_type = part.get("mimeType", "")
+        body_data = part.get("body", {}).get("data", "")
+        if 'attachmentId' in part.get("body", {}) and part.get("filename"):
+            continue  # skip attachments
+        if mime_type == "text/html" and body_data:
+            decoded = base64.urlsafe_b64decode(body_data).decode("utf-8")
+            return decoded
+        elif mime_type == "text/plain" and body_data:
+            decoded = base64.urlsafe_b64decode(body_data).decode("utf-8")
+            return f"<pre>{decoded}</pre>"  # preserve formatting
+        elif "parts" in part:
+            nested = get_formatted_email_body(part["parts"])
+            if nested:
+                return nested
+    return ""
+
+
+def get_message_details(service,user_id='me',max_results=10):
+    results = []
+    response = service.users().messages().list(userId=user_id, maxResults=max_results).execute()
+    messages = response.get("messages", [])
+
+    for msg in messages:
+        msg_detail = service.users().messages().get(userId=user_id, id=msg['id'], format='full').execute()
+        headers = msg_detail['payload'].get('headers', [])
+        parts = msg_detail['payload'].get('parts', [])
+        payload = msg_detail['payload']
+        label_ids = msg_detail.get('labelIds', [])
+
+        sender = subject = ""
+        has_attachment = False
+
+        for header in headers:
+            if header['name'] == 'From':
+                sender = header['value']
+            elif header['name'] == 'Subject':
+                subject = header['value']
+
+        # Check attachment
+        def contains_attachment(parts):
+            for part in parts:
+                if part.get("filename") and 'attachmentId' in part.get("body", {}):
+                    return True
+                if "parts" in part:
+                    if contains_attachment(part["parts"]):
+                        return True
+            return False
+
+        has_attachment = contains_attachment(parts)
+        email_body = get_formatted_email_body(parts if parts else [payload])
+
+        results.append({
+            "sender": sender,
+            "subject": subject,
+            "label": label_ids,
+            "body": email_body,  # HTML body
+            "contain_attachment": has_attachment
+        })
+
+    return results
+        
+
+def extract():
    creds=authenticiate()
+   if creds is None:
+      print("No credentials available.Aborting")
+      return
 
    service=api_call(credentials=creds)
+   if service is None:
+        print("Could not build Gmail API service. Aborting.")
+        return
 
    print(service)
 
-   results=service.users().messages().list(userId='me').execute()
-   messagesdetails=results.get('messages')
-   ids=[ msg.get('id',{}) for msg in messagesdetails]
-   # print(ids)
-   for id in ids:
-      print(f"Message: {id}")
-      get_message_body(service,msg_id=id,user_id='me')
-      print("###"*50)
+   emails=get_message_details(service)
+
+   for email in emails:
+       html_content=email['body']
+       soup = BeautifulSoup(html_content, "html.parser")
+       clean_html = soup.get_text()
+       print(clean_html)
+    #    with open("email_preview.html", "w", encoding="utf-8") as f:
+    #          f.write(html_content)
+       
+        
+       
+       
+       break
+
+   # results=service.users().messages().list(userId='me').execute()
+   # messagesdetails=results.get('messages')
+   # ids=[ msg.get('id',{}) for msg in messagesdetails]
+   # # print(ids)
+   # for id in ids:
+   #    print(f"Message: {id}")
+   #    get_message_body(service,msg_id=id,user_id='me')
+   #    print("###"*50)
       
    
    # messages=service.users().messages().get(userId='me',id=id).execute()
@@ -183,4 +272,4 @@ def main():
 
 
 if __name__ == "__main__":
-  main()
+  extract()
