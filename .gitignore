@@ -35,5 +35,8 @@ backend/token.json
 backend/.env
 backend/email_preview.html
 backend/test.html
-
+backend/utility/credentials.json
+backend/utility/token.json
+credentials.json
+token.json
 
