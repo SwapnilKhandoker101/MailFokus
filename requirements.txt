@@ -15,3 +15,4 @@ threadpoolctl
 joblib
 langchain
 langchain-huggingface
+bert-extractive-summarizer

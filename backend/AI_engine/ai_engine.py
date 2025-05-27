@@ -2,6 +2,7 @@ from transformers import pipeline,AutoTokenizer, AutoModelForSeq2SeqLM,set_seed
 import torch
 from langchain_huggingface import HuggingFacePipeline
 from langchain.prompts import PromptTemplate
+from summarizer import Summarizer
 
 
 
@@ -9,26 +10,39 @@ class AI_engine:
     
     def __init__(self):
         
-        self.summarizer_facebook_bart = pipeline("summarization", model="facebook/bart-large-cnn")
-        
+        self.summarize_facebook_bart = pipeline("summarization", model="facebook/bart-large-cnn")
+        self.tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-cnn")
+        self.extractive_model_summarize=Summarizer()
+
+
         self.classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
         
     
-    def summarize_facebook_bart(self,text:str,model:str)->str:
-        word_count=len(text.split())
-        if word_count<30:
-            return text
+    def summarizer_facebook_bart(self,text:str)->str:
+        # word_count=len(text.split())
+        input_tokens=len(self.tokenizer.encode(text))
+        if input_tokens<142:
+           return text
+        
+        hint = "Summarize the email and make sure to include any dates, deadlines, or scheduled meetings.\n\n"
+        augmented_text=hint+text
         
         
-        summary=self.summarizer_facebook_bart(
-            text,
-            max_length=130,
+        summary=self.summarize_facebook_bart(
+            augmented_text,
+            max_length=142,
             min_length=30,
-            do_sample=False
+            do_sample=False,
+
         )[0]['summary_text']
 
         return summary
     
+    def summarizer_extractive_model(self,text:str)->str:
+        summary=self.extractive_model_summarize(text,ratio=0.40) 
+        return summary
+   
+
     def categorization(self,text)->str:
         # set_seed(42)
         # template=PromptTemplate.from_template("Categorizes the following email text :{\n\ntext} into a one category")

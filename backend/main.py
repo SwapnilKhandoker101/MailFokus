@@ -15,6 +15,10 @@ for email in emails:
     text=soup.get_text()
     category=engine.categorization(text)
     print(category['labels'][0])
+    print('summary: ')
+    # summary=engine.summarizer_facebook_bart(text)
+    summary=engine.summarizer_extractive_model(text)
+    print(summary)
     break
 
 
