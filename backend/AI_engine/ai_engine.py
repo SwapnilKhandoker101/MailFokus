@@ -10,13 +10,20 @@ class AI_engine:
     
     def __init__(self):
         
+        # summarizer:
         self.summarize_facebook_bart = pipeline("summarization", model="facebook/bart-large-cnn")
         self.tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-cnn")
         self.extractive_model_summarize=Summarizer()
 
 
+        # classifier:
         self.classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
         
+
+        # name-entity-extraction:
+        self.ner_bert = pipeline("ner", model="dslim/bert-base-NER", aggregation_strategy="simple")
+
+
     
     def summarizer_facebook_bart(self,text:str)->str:
         # word_count=len(text.split())
@@ -42,7 +49,7 @@ class AI_engine:
         summary=self.extractive_model_summarize(text,ratio=0.40) 
         return summary
    
-
+ 
     def categorization(self,text)->str:
         # set_seed(42)
         # template=PromptTemplate.from_template("Categorizes the following email text :{\n\ntext} into a one category")
@@ -57,6 +64,11 @@ class AI_engine:
 
         return category
         
+    def entity_extraction_xlm_roberta(self,text:str)->str:
+
+        entities=self.ner_bert(text)
+
+        return entities
 
     
 
