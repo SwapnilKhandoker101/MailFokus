@@ -16,3 +16,6 @@ joblib
 langchain
 langchain-huggingface
 bert-extractive-summarizer
+sqlalchemy
+clerk_backend_api
+uvicorn
