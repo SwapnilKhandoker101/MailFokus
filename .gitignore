@@ -42,3 +42,5 @@ token.json
 
 backend/user_tokens/
 
+database.db
+backend/database.db
