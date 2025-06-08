@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from clerk_backend_api import Clerk,AuthenticateRequestOptions
 import os
+from utility.extractor import *
 
 from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
@@ -24,8 +25,15 @@ def authenticate_and_get_user_details(request):
         
 
         user_id=request_state.payload.get("sub")
+        creds=authenticiate(user_id)
+        if creds is None:
+            raise HTTPException(status_code=401,detail="No gmail credentials available.Aborting")
+        
+        service=api_call(credentials=creds)
+        if service is None:
+            raise HTTPException(status_code=401,detail="Could not build Gmail API service. Aborting.")
 
-        return {"user_id":user_id}
+        return {"user_id":user_id,"service":service}
 
     
     except Exception as e:

@@ -1,3 +1,4 @@
+from pydantic import BaseModel, Field
 from sqlalchemy import Column, ForeignKey,Integer,String,DateTime,create_engine,Text
 
 from sqlalchemy.ext.declarative import declarative_base
@@ -14,6 +15,7 @@ class EmailRecord(Base):
 
     id=Column(Integer,primary_key=True,index=True)
     email_subject=Column(Text)
+    original_email_label=Column(Text)
     original_email=Column(Text)
     summary=Column(Text)
     category=Column(Text)
@@ -32,5 +34,10 @@ def get_db():
     finally:
         db.close()
     
+
+
+
+
+
 
     

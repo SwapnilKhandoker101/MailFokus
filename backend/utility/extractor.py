@@ -21,20 +21,28 @@ from googleapiclient.errors import HttpError
 # If modifying these scopes, delete the file token.json.
 # SCOPES = ["https://mail.google.com/"]
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+USER_TOKEN_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "user_tokens")
+CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), 'credentials.json')
+os.makedirs(USER_TOKEN_DIR, exist_ok=True)
+
+def get_user_token_path(user_id: str) -> str:
+    return os.path.join(USER_TOKEN_DIR, f"{user_id}_token.json")
 
 
-def authenticiate():
+def authenticiate(user_id:str='test_user101'):
     try:
+        token_path = get_user_token_path(user_id)
         creds = None
-        if os.path.exists('token.json'):
-            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+        if os.path.exists(token_path):
+            creds = Credentials.from_authorized_user_file(token_path, SCOPES)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-                creds = flow.run_local_server(port=8080)
-            with open("token.json", "w") as token:
+                
+                flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)
+                creds = flow.run_local_server(port=8000)
+            with open(token_path, "w") as token:
                 token.write(creds.to_json())
         return creds
     except Exception as error:
