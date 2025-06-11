@@ -6,3 +6,16 @@ regex
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
+transformers
+torch
+uvicorn
+python-dotenv
+scipy
+threadpoolctl 
+joblib
+langchain
+langchain-huggingface
+bert-extractive-summarizer
+sqlalchemy
+clerk_backend_api
+uvicorn
