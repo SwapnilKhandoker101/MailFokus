@@ -44,3 +44,4 @@ backend/user_tokens/
 
 database.db
 backend/database.db
+frontend/.env

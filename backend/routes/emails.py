@@ -2,14 +2,14 @@ from fastapi import APIRouter,Depends,HTTPException,Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from bs4 import BeautifulSoup
-from ..database.models import EmailRecord
+from database.models import EmailRecord
 
-from utility.extractor import *
+from utility.extractor import get_message_details, api_call, authenticiate
 
-from ..database.db import *
+from database.db import *
 
 from utility.utils import authenticate_and_get_user_details
-from ..database.models import get_db
+from database.models import get_db
 import json
 from datetime import datetime
 from AI_engine.ai_engine import AI_engine
@@ -107,7 +107,7 @@ async def generate_summary(email_id:int,request_obj:Request,db:Session=Depends(g
     try:
         user_details=authenticate_and_get_user_details(request_obj)
         user_id=user_details.get('user_id')
-        user_service=user_details('service')
+        user_service=user_details.get('service')
 
         email_record=get_email_by_id_from_db(db,user_id,email_id=email_id)
 

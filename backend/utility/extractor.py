@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 
 
-from google.auth.transport.requests import Request
+from google.auth.transport.requests import Request as GoogleAuthRequest
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -37,7 +37,7 @@ def authenticiate(user_id:str='test_user101'):
             creds = Credentials.from_authorized_user_file(token_path, SCOPES)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
+                creds.refresh(GoogleAuthRequest())
             else:
                 
                 flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)

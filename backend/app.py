@@ -1,7 +1,7 @@
 from fastapi import FastAPI,Request,Response
 from fastapi.middleware.cors import CORSMiddleware
 from clerk_backend_api import Clerk
-from .routes import emails
+from routes import emails
 import socket
 import os
 from dotenv import load_dotenv
