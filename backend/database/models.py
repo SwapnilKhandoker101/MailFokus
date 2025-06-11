@@ -14,6 +14,7 @@ class EmailRecord(Base):
     __tablename__='email_records'
 
     id=Column(Integer,primary_key=True,index=True)
+    sender=Column(Text)
     email_subject=Column(Text)
     original_email_label=Column(Text)
     original_email=Column(Text)

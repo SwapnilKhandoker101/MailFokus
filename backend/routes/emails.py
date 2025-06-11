@@ -47,6 +47,7 @@ async def extract_original_emails(request:Request,db:Session=Depends(get_db)):
             clean_text=soup.get_text()
             db_record=create_email_into_db(
                 db=db,
+                sender=email['sender'],
                 email_subject=email['subject'],
                 original_email=clean_text,
                 original_email_label=",".join(email.get('label',[])),

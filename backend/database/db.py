@@ -4,6 +4,7 @@ from . import models
 
 def create_email_into_db(
         db:Session,
+        sender:str,
         email_subject:str,
         original_email_label:str,
         original_email:str,
@@ -13,6 +14,7 @@ def create_email_into_db(
         user_id:str
 ):
     db_emails=models.EmailRecord(
+        sender=sender,
         email_subject=email_subject,
         original_email_label=original_email_label,
         original_email=original_email,
