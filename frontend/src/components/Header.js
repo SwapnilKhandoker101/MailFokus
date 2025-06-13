@@ -67,7 +67,7 @@ const Header = () => {
                         inputProps={{ 'aria-label': 'search' }}
                     />
                 </SearchContainer>
-                <Box sx={{ flexGrow: 1 }} />
+                {/* <Box sx={{ flexGrow: 1 }} />
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <IconButton size="large" color="inherit">
                         <NotificationsIcon />
@@ -75,7 +75,7 @@ const Header = () => {
                     <Avatar sx={{ bgcolor: 'primary.main', ml: 2 }}>
                         U
                     </Avatar>
-                </Box>
+                </Box> */}
             </Toolbar>
         </AppBar>
     );
