@@ -1,8 +1,6 @@
 # Python
 venv/
 
-.env
-
 # # FastAPI/Uvicorn logs
 # *.log
 

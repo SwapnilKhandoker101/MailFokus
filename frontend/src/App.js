@@ -13,6 +13,9 @@ import theme from "./theme";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import Models from "./pages/Models";
+import Security from "./pages/Security";
+import Settings from "./pages/Settings";
 import ClerkProviderWithRoutes from "./auth/ClerkProvider";
 import AuthenticationPage from "./auth/AuthenticationPage";
 import "./App.css";
@@ -62,44 +65,17 @@ function App() {
         <Route path="/sign-in/*" element={<AuthenticationPage />} />
         <Route path="/sign-up" element={<AuthenticationPage />} />
 
+        {/* Protected Routes with Layout */}
         <Route element={<Layout/>}>
-        <Route path="/dashboard" element={<Dashboard/>}/>
+          <Route path="/dashboard" element={<Dashboard/>}/>
+          <Route path="/models" element={<Models/>}/>
+          <Route path="/security" element={<Security/>}/>
+          <Route path="/settings" element={<Settings/>}/>
         </Route>
 
       </Routes>
     </ClerkProviderWithRoutes>
   );
 }
-
-// function App() {
-//     const [showLogin, setShowLogin] = useState(false);
-
-//     // if showLogin true --> show Login page
-//     if(showLogin){
-//         return (
-//             <ThemeProvider theme={theme}>
-//                 <CssBaseline />
-//                 <Login />
-//             </ThemeProvider>
-//         );
-//     }
-
-//     // else return start page
-//   return (
-//     <ThemeProvider theme={theme}>
-//         <CssBaseline />
-//         <Router>
-//             <Routes>
-//                 <Route path="/" element={<HomePage />} />
-//                 <Route path="/login" element={<Login />} />
-//                 <Route path="/register" element={<Register />} />
-//                 <Route path="/dashboard" element={<Dashboard />} />
-//                 {/* Redirect any unknown routes to home*/}
-//                 <Route path="*" element={<Navigate to="/" replace />} />
-//             </Routes>
-//         </Router>
-//     </ThemeProvider>
-//   );
-// }
 
 export default App;
