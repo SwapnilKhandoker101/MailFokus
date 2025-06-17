@@ -12,7 +12,9 @@ import {
   styled,
   IconButton,
   Divider,
-  Button
+  Button,
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -20,7 +22,8 @@ import {
   StarBorder as StarBorderIcon,
   Reply as ReplyIcon,
   Forward as ForwardIcon,
-  Delete as DeleteIcon
+  Delete as DeleteIcon,
+  AutoAwesome as SummaryIcon
 } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
 import SearchbarHeader from '../components/SearchbarHeader';
@@ -47,13 +50,13 @@ const ContentArea = styled(Box)({
 
 const TabPanel = ({ children, value, index }) => {
   return (
-    <div hidden={value !== index}>
-      {value === index && children}
-    </div>
+      <div hidden={value !== index}>
+        {value === index && children}
+      </div>
   );
 };
 
-// Mock email data with full content
+// Mock email data with summaries
 const mockEmails = [
   {
     id: 1,
@@ -84,7 +87,18 @@ Project Manager`,
     category: 'Meeting',
     read: false,
     starred: false,
-    attachments: ['Q4_Budget_Review.pdf', 'Performance_Metrics.xlsx']
+    attachments: ['Q4_Budget_Review.pdf', 'Performance_Metrics.xlsx'],
+    summary: {
+      title: 'Quarterly Planning Meeting Request',
+      keyPoints: [
+        'Quarterly planning meeting scheduled for next week',
+        'Topics: Q4 budget review, next quarter objectives, team allocation',
+        'Documents attached for review: performance metrics and budget draft'
+      ],
+      action: 'Review attached documents before meeting',
+      priority: 'High',
+      sentiment: 'Professional'
+    }
   },
   {
     id: 2,
@@ -116,7 +130,18 @@ Senior Developer`,
     category: 'Follow-Up',
     read: false,
     starred: true,
-    attachments: []
+    attachments: [],
+    summary: {
+      title: 'Meeting Reschedule Request',
+      keyPoints: [
+        'Project status meeting moved from tomorrow 2 PM to Thursday 2 PM',
+        'Reason: urgent client call conflict',
+        'Same agenda: timeline review, budget update, risk assessment'
+      ],
+      action: 'Confirm Thursday availability',
+      priority: 'Medium',
+      sentiment: 'Apologetic'
+    }
   },
   {
     id: 3,
@@ -151,7 +176,18 @@ The Design Review Team`,
     category: 'Work',
     read: true,
     starred: false,
-    attachments: []
+    attachments: [],
+    summary: {
+      title: 'Design Newsletter - Weekly Highlights',
+      keyPoints: [
+        'Design trends: minimalist UI, bold typography, color psychology',
+        'New tools: Figma plugins, CSS Grid best practices',
+        'Case studies: Spotify and Netflix interface design'
+      ],
+      action: 'Review design resources and trends',
+      priority: 'Low',
+      sentiment: 'Informative'
+    }
   },
   {
     id: 4,
@@ -185,39 +221,75 @@ Finance Director`,
     category: 'Work',
     read: false,
     starred: false,
-    attachments: ['Q4_Budget_Report.pdf', 'Cost_Analysis.xlsx']
+    attachments: ['Q4_Budget_Report.pdf', 'Cost_Analysis.xlsx'],
+    summary: {
+      title: 'Q4 Budget Report Analysis',
+      keyPoints: [
+        'Budget performance: 95% of target achieved',
+        'Operational costs up 12%, marketing ROI up 8%',
+        'Software licensing costs down 15%'
+      ],
+      action: 'Review report and provide feedback by Friday',
+      priority: 'High',
+      sentiment: 'Professional'
+    }
   }
 ];
 
 const Dashboard = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [selectedEmail, setSelectedEmail] = useState(null);
+  const [selectedSummary, setSelectedSummary] = useState(null);
   const [emails, setEmails] = useState(mockEmails);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateStatus, setGenerateStatus] = useState('');
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
-    setSelectedEmail(null); // Close email details when switching tabs
+    setSelectedEmail(null);
+    setSelectedSummary(null);
   };
 
   const handleEmailClick = (email) => {
-    // Mark email as read
     setEmails(prev => prev.map(e =>
-      e.id === email.id ? { ...e, read: true } : e
+        e.id === email.id ? { ...e, read: true } : e
     ));
     setSelectedEmail(email);
   };
 
+  const handleSummaryClick = (email) => {
+    setSelectedSummary(email);
+  };
+
   const handleBackToList = () => {
     setSelectedEmail(null);
+    setSelectedSummary(null);
   };
 
   const handleStarToggle = (emailId) => {
     setEmails(prev => prev.map(e =>
-      e.id === emailId ? { ...e, starred: !e.starred } : e
+        e.id === emailId ? { ...e, starred: !e.starred } : e
     ));
     if (selectedEmail && selectedEmail.id === emailId) {
       setSelectedEmail(prev => ({ ...prev, starred: !prev.starred }));
     }
+  };
+
+  const generateSummary = async () => {
+    setIsGenerating(true);
+    setGenerateStatus('');
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    setIsGenerating(false);
+    setGenerateStatus('success');
+    setTimeout(() => setGenerateStatus(''), 3000);
+  };
+
+  const loadEmails = async () => {
+    // Simulate loading emails
+    console.log('Loading emails...');
   };
 
   const getCategoryColor = (category) => {
@@ -230,199 +302,343 @@ const Dashboard = () => {
     return colors[category] || '#757575';
   };
 
+  const getPriorityColor = (priority) => {
+    const colors = {
+      'High': '#F44336',
+      'Medium': '#FF9800',
+      'Low': '#4CAF50'
+    };
+    return colors[priority] || '#757575';
+  };
+
   // Email list view
   const EmailList = () => (
-    <Paper elevation={1}>
-      <List>
-        {emails.map((email) => (
-          <ListItem
-            key={email.id}
-            sx={{
-              borderBottom: '1px solid #eee',
-              '&:hover': { backgroundColor: '#f5f5f5' },
-              cursor: 'pointer'
-            }}
-            onClick={() => handleEmailClick(email)}
-          >
-            <ListItemText
-              primary={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography
-                    variant="body1"
-                    sx={{ fontWeight: email.read ? 400 : 600 }}
-                  >
-                    {email.from}
-                  </Typography>
-                  <Chip
-                    label={email.category}
-                    size="small"
-                    sx={{
-                      backgroundColor: getCategoryColor(email.category),
-                      color: 'white',
-                      fontSize: '0.75rem'
-                    }}
-                  />
-                  {email.starred && (
-                    <StarIcon sx={{ color: '#FFD700', fontSize: 16 }} />
-                  )}
-                </Box>
-              }
-              secondary={
-                <Box>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: email.read ? 400 : 600 }}
-                  >
-                    {email.subject}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {email.preview}
-                  </Typography>
-                </Box>
-              }
-            />
-            <Typography variant="caption" color="text.secondary">
-              {email.time}
-            </Typography>
-          </ListItem>
-        ))}
-      </List>
-    </Paper>
+      <Paper elevation={1}>
+        <List>
+          {emails.map((email) => (
+              <ListItem
+                  key={email.id}
+                  sx={{
+                    borderBottom: '1px solid #eee',
+                    '&:hover': { backgroundColor: '#f5f5f5' },
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => handleEmailClick(email)}
+              >
+                <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography
+                            variant="body1"
+                            sx={{ fontWeight: email.read ? 400 : 600 }}
+                        >
+                          {email.from}
+                        </Typography>
+                        <Chip
+                            label={email.category}
+                            size="small"
+                            sx={{
+                              backgroundColor: getCategoryColor(email.category),
+                              color: 'white',
+                              fontSize: '0.75rem'
+                            }}
+                        />
+                        {email.starred && (
+                            <StarIcon sx={{ color: '#FFD700', fontSize: 16 }} />
+                        )}
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Typography
+                            variant="body2"
+                            sx={{ fontWeight: email.read ? 400 : 600 }}
+                        >
+                          {email.subject}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {email.preview}
+                        </Typography>
+                      </Box>
+                    }
+                />
+                <Typography variant="caption" color="text.secondary">
+                  {email.time}
+                </Typography>
+              </ListItem>
+          ))}
+        </List>
+      </Paper>
+  );
+
+  // Summary list view
+  const SummaryList = () => (
+      <Paper elevation={1}>
+        <List>
+          {emails.filter(email => email.summary).map((email) => (
+              <ListItem
+                  key={email.id}
+                  sx={{
+                    borderBottom: '1px solid #eee',
+                    '&:hover': { backgroundColor: '#f5f5f5' },
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => handleSummaryClick(email)}
+              >
+                <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <SummaryIcon sx={{ color: 'primary.main', fontSize: 18 }} />
+                        <Typography variant="body1" fontWeight={600}>
+                          {email.summary.title}
+                        </Typography>
+                        <Chip
+                            label={email.summary.priority}
+                            size="small"
+                            sx={{
+                              backgroundColor: getPriorityColor(email.summary.priority),
+                              color: 'white',
+                              fontSize: '0.75rem'
+                            }}
+                        />
+                      </Box>
+                    }
+                    secondary={
+                      <Box sx={{ mt: 1 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          From: {email.from} • {email.date}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 0.5 }}>
+                          Action: {email.summary.action}
+                        </Typography>
+                      </Box>
+                    }
+                />
+              </ListItem>
+          ))}
+        </List>
+      </Paper>
   );
 
   // Email detail view
   const EmailDetail = ({ email }) => (
-    <Paper elevation={1} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Email Header */}
-      <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <IconButton onClick={handleBackToList} sx={{ mr: 1 }}>
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            {email.subject}
-          </Typography>
-          <IconButton onClick={() => handleStarToggle(email.id)}>
-            {email.starred ? <StarIcon sx={{ color: '#FFD700' }} /> : <StarBorderIcon />}
-          </IconButton>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Box>
-            <Typography variant="body1" fontWeight={600}>
-              {email.from}
+      <Paper elevation={1} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <IconButton onClick={handleBackToList} sx={{ mr: 1 }}>
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              {email.subject}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {email.fromEmail}
-            </Typography>
+            <IconButton onClick={() => handleStarToggle(email.id)}>
+              {email.starred ? <StarIcon sx={{ color: '#FFD700' }} /> : <StarBorderIcon />}
+            </IconButton>
           </Box>
-          <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="body2" color="text.secondary">
-              {email.date}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {email.time}
-            </Typography>
-          </Box>
-        </Box>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Chip
-            label={email.category}
-            size="small"
-            sx={{
-              backgroundColor: getCategoryColor(email.category),
-              color: 'white'
-            }}
-          />
-          {email.attachments.length > 0 && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box>
+              <Typography variant="body1" fontWeight={600}>
+                {email.from}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {email.fromEmail}
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography variant="body2" color="text.secondary">
+                {email.date}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {email.time}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <Chip
-              label={`${email.attachments.length} Attachment${email.attachments.length > 1 ? 's' : ''}`}
-              size="small"
-              variant="outlined"
+                label={email.category}
+                size="small"
+                sx={{
+                  backgroundColor: getCategoryColor(email.category),
+                  color: 'white'
+                }}
             />
+            {email.attachments.length > 0 && (
+                <Chip
+                    label={`${email.attachments.length} Attachment${email.attachments.length > 1 ? 's' : ''}`}
+                    size="small"
+                    variant="outlined"
+                />
+            )}
+          </Box>
+        </Box>
+
+        <Box sx={{ flex: 1, p: 2, overflow: 'auto' }}>
+          <Typography variant="body1" sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
+            {email.content}
+          </Typography>
+
+          {email.attachments.length > 0 && (
+              <Box sx={{ mt: 3 }}>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="subtitle2" gutterBottom>
+                  Attachments:
+                </Typography>
+                {email.attachments.map((attachment, index) => (
+                    <Chip
+                        key={index}
+                        label={attachment}
+                        variant="outlined"
+                        sx={{ mr: 1, mb: 1 }}
+                        clickable
+                    />
+                ))}
+              </Box>
           )}
         </Box>
-      </Box>
 
-      {/* Email Content */}
-      <Box sx={{ flex: 1, p: 2, overflow: 'auto' }}>
-        <Typography variant="body1" sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
-          {email.content}
-        </Typography>
+        <Box sx={{ p: 2, borderTop: '1px solid #eee', display: 'flex', gap: 1 }}>
+          <Button variant="contained" startIcon={<ReplyIcon />}>
+            Reply
+          </Button>
+          <Button variant="outlined" startIcon={<ForwardIcon />}>
+            Forward
+          </Button>
+          <Button variant="outlined" color="error" startIcon={<DeleteIcon />}>
+            Delete
+          </Button>
+        </Box>
+      </Paper>
+  );
 
-        {email.attachments.length > 0 && (
-          <Box sx={{ mt: 3 }}>
-            <Divider sx={{ mb: 2 }} />
-            <Typography variant="subtitle2" gutterBottom>
-              Attachments:
+  // Summary detail view
+  const SummaryDetail = ({ email }) => (
+      <Paper elevation={1} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <IconButton onClick={handleBackToList} sx={{ mr: 1 }}>
+              <ArrowBackIcon />
+            </IconButton>
+            <SummaryIcon sx={{ mr: 1, color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              {email.summary.title}
             </Typography>
-            {email.attachments.map((attachment, index) => (
-              <Chip
-                key={index}
-                label={attachment}
+            <Chip
+                label={email.summary.priority}
+                size="small"
+                sx={{
+                  backgroundColor: getPriorityColor(email.summary.priority),
+                  color: 'white'
+                }}
+            />
+          </Box>
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box>
+              <Typography variant="body1" fontWeight={600}>
+                Original Email: {email.subject}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                From: {email.from} • {email.date}
+              </Typography>
+            </Box>
+            <Chip
+                label={email.summary.sentiment}
                 variant="outlined"
-                sx={{ mr: 1, mb: 1 }}
-                clickable
-              />
+                size="small"
+            />
+          </Box>
+        </Box>
+
+        <Box sx={{ flex: 1, p: 2, overflow: 'auto' }}>
+          <Typography variant="h6" gutterBottom>
+            Key Points
+          </Typography>
+          <Box sx={{ mb: 3 }}>
+            {email.summary.keyPoints.map((point, index) => (
+                <Typography key={index} variant="body1" sx={{ mb: 1 }}>
+                  • {point}
+                </Typography>
             ))}
           </Box>
-        )}
-      </Box>
 
-      {/* Email Actions */}
-      <Box sx={{ p: 2, borderTop: '1px solid #eee', display: 'flex', gap: 1 }}>
-        <Button variant="contained" startIcon={<ReplyIcon />}>
-          Reply
-        </Button>
-        <Button variant="outlined" startIcon={<ForwardIcon />}>
-          Forward
-        </Button>
-        <Button variant="outlined" color="error" startIcon={<DeleteIcon />}>
-          Delete
-        </Button>
-      </Box>
-    </Paper>
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant="h6" gutterBottom>
+            Required Action
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+            {email.summary.action}
+          </Typography>
+
+          <Button
+              variant="outlined"
+              onClick={() => handleEmailClick(email)}
+              sx={{ mt: 2 }}
+          >
+            View Original Email
+          </Button>
+        </Box>
+      </Paper>
   );
 
   return (
-    <DashboardContainer>
-      <Sidebar />
+      <DashboardContainer>
+        <Sidebar />
 
-      <MainContent>
-        <SearchbarHeader />
+        <MainContent>
+          <SearchbarHeader />
 
-        <ContentArea>
-          {!selectedEmail ? (
-            <>
-              <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-                <Tabs value={selectedTab} onChange={handleTabChange}>
-                  <Tab label="Inbox" />
-                  <Tab label="Summarized" />
-                </Tabs>
-              </Box>
+          <ContentArea>
+            {!selectedEmail && !selectedSummary ? (
+                <>
+                  <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+                    <Tabs value={selectedTab} onChange={handleTabChange}>
+                      <Tab label="Inbox" />
+                      <Tab label="Summarized" />
+                    </Tabs>
+                  </Box>
 
-              <TabPanel value={selectedTab} index={0}>
-                <EmailList />
-              </TabPanel>
+                  <TabPanel value={selectedTab} index={0}>
+                    <EmailList />
+                  </TabPanel>
 
-              <TabPanel value={selectedTab} index={1}>
-                <Paper elevation={1} sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Email Summaries
-                  </Typography>
-                  <Typography color="text.secondary">
-                    AI-generated summaries will appear here when emails are processed.
-                  </Typography>
-                </Paper>
-              </TabPanel>
-            </>
-          ) : (
-            <EmailDetail email={selectedEmail} />
-          )}
-        </ContentArea>
-      </MainContent>
-    </DashboardContainer>
+                  <TabPanel value={selectedTab} index={1}>
+                    <Box sx={{ mb: 2 }}>
+                      {generateStatus === 'success' && (
+                          <Alert severity="success" sx={{ mb: 2 }}>
+                            Summaries generated successfully!
+                          </Alert>
+                      )}
+
+                      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                        <Typography variant="h6">Email Summaries</Typography>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={isGenerating ? <CircularProgress size={16} /> : <SummaryIcon />}
+                            onClick={async () => {
+                              await generateSummary();
+                              await loadEmails();
+                            }}
+                            disabled={isGenerating}
+                        >
+                          {isGenerating ? 'Generating...' : 'Generate Summaries'}
+                        </Button>
+                      </Box>
+                    </Box>
+                    <SummaryList />
+                  </TabPanel>
+                </>
+            ) : selectedEmail ? (
+                <EmailDetail email={selectedEmail} />
+            ) : (
+                <SummaryDetail email={selectedSummary} />
+            )}
+          </ContentArea>
+        </MainContent>
+      </DashboardContainer>
   );
 };
 
