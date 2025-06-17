@@ -10,14 +10,8 @@ import {
   Chip,
   Paper,
   styled,
-  Card,
-  CardContent,
   IconButton,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button
 } from '@mui/material';
 import {
@@ -29,7 +23,7 @@ import {
   Delete as DeleteIcon
 } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
+import SearchbarHeader from '../components/SearchbarHeader';
 
 // Styled components
 const DashboardContainer = styled(Box)({
@@ -396,7 +390,7 @@ const Dashboard = () => {
       <Sidebar />
 
       <MainContent>
-        <Header />
+        <SearchbarHeader />
 
         <ContentArea>
           {!selectedEmail ? (
@@ -405,8 +399,6 @@ const Dashboard = () => {
                 <Tabs value={selectedTab} onChange={handleTabChange}>
                   <Tab label="Inbox" />
                   <Tab label="Summarized" />
-                  <Tab label="Classification" />
-                  <Tab label="Updates" />
                 </Tabs>
               </Box>
 
@@ -421,28 +413,6 @@ const Dashboard = () => {
                   </Typography>
                   <Typography color="text.secondary">
                     AI-generated summaries will appear here when emails are processed.
-                  </Typography>
-                </Paper>
-              </TabPanel>
-
-              <TabPanel value={selectedTab} index={2}>
-                <Paper elevation={1} sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Email Classification
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Email categories and classification settings will be shown here.
-                  </Typography>
-                </Paper>
-              </TabPanel>
-
-              <TabPanel value={selectedTab} index={3}>
-                <Paper elevation={1} sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    System Updates
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Recent system updates and notifications will appear here.
                   </Typography>
                 </Paper>
               </TabPanel>
