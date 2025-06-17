@@ -2,24 +2,26 @@ import React from 'react';
 import {
     AppBar,
     Toolbar,
+    Typography,
     IconButton,
-    InputBase,
-    Avatar,
     Box,
-    styled
+    InputBase,
+    Badge
 } from '@mui/material';
 import {
     Search as SearchIcon,
-    Notifications as NotificationsIcon
+    Notifications as NotificationsIcon,
+    Menu as MenuIcon
 } from '@mui/icons-material';
+import { styled, alpha } from '@mui/material/styles';
+import { UserButton, useUser } from '@clerk/clerk-react';
 
-// Custom styled components
-const SearchContainer = styled('div')(({ theme }) => ({
+const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
-    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
     '&:hover': {
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+        backgroundColor: alpha(theme.palette.common.white, 0.25),
     },
     marginRight: theme.spacing(2),
     marginLeft: 0,
@@ -38,44 +40,121 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: theme.palette.text.secondary,
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: theme.palette.text.primary,
-    width: '100%',
+    color: 'inherit',
     '& .MuiInputBase-input': {
         padding: theme.spacing(1, 1, 1, 0),
         paddingLeft: `calc(1em + ${theme.spacing(4)})`,
         transition: theme.transitions.create('width'),
+        width: '100%',
         [theme.breakpoints.up('md')]: {
-            width: '40ch',
+            width: '20ch',
         },
     },
 }));
 
 const Header = () => {
+    const { user, isLoaded } = useUser();
+
     return (
-        <AppBar position="static" color="transparent" elevation={0}>
+        <AppBar
+            position="static"
+            elevation={0}
+            sx={{
+                backgroundColor: 'white',
+                color: 'text.primary',
+                borderBottom: '1px solid #e0e0e0',
+                zIndex: (theme) => theme.zIndex.drawer - 1
+            }}
+        >
             <Toolbar>
-                <SearchContainer>
+                {/* Mobile Menu Button (optional) */}
+                <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    sx={{ mr: 2, display: { md: 'none' } }}
+                >
+                    <MenuIcon />
+                </IconButton>
+
+                {/* Logo/Title - only on small devices */}
+                <Typography
+                    variant="h6"
+                    component="div"
+                    sx={{
+                        display: { xs: 'block', md: 'none' },
+                        flexGrow: 1
+                    }}
+                >
+                    MailFokus
+                </Typography>
+
+                {/* Search Bar */}
+                <Search sx={{ display: { xs: 'none', md: 'block' } }}>
                     <SearchIconWrapper>
                         <SearchIcon />
                     </SearchIconWrapper>
                     <StyledInputBase
-                        placeholder="Search emails…"
+                        placeholder="Search emails..."
                         inputProps={{ 'aria-label': 'search' }}
                     />
-                </SearchContainer>
-                {/* <Box sx={{ flexGrow: 1 }} />
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <IconButton size="large" color="inherit">
-                        <NotificationsIcon />
+                </Search>
+
+                {/* Spacer */}
+                <Box sx={{ flexGrow: 1 }} />
+
+                {/* User Info & Actions */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {/* Welcome Message */}
+                    {isLoaded && user && (
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                mr: 2,
+                                display: { xs: 'none', sm: 'block' },
+                                color: 'text.secondary'
+                            }}
+                        >
+                            Welcome, {user.firstName || user.emailAddresses[0].emailAddress}
+                        </Typography>
+                    )}
+
+                    {/* Notifications */}
+                    <IconButton
+                        size="large"
+                        color="inherit"
+                        sx={{ mr: 1 }}
+                    >
+                        <Badge badgeContent={4} color="error">
+                            <NotificationsIcon />
+                        </Badge>
                     </IconButton>
-                    <Avatar sx={{ bgcolor: 'primary.main', ml: 2 }}>
-                        U
-                    </Avatar>
-                </Box> */}
+
+                    {/* Clerk User Button */}
+                    <Box sx={{
+                        '& .cl-userButtonBox': {
+                            flexDirection: 'row-reverse'  // User info right from Avatar
+                        },
+                        '& .cl-userButtonTrigger': {
+                            height: '40px',
+                            width: '40px'
+                        }
+                    }}>
+                        <UserButton
+                            appearance={{
+                                elements: {
+                                    userButtonAvatarBox: 'w-10 h-10',  // size of Avatar
+                                    userButtonPopoverCard: 'shadow-lg',
+                                    userButtonPopoverActionButton: 'text-sm'
+                                }
+                            }}
+                        />
+                    </Box>
+                </Box>
             </Toolbar>
         </AppBar>
     );
