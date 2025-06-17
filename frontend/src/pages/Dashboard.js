@@ -371,7 +371,7 @@ const Dashboard = () => {
       </Paper>
   );
 
-  // Summary list view
+  // Summarylist view
   const SummaryList = () => (
       <Paper elevation={1}>
         <List>
