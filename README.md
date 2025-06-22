@@ -26,6 +26,8 @@ To run the backend of this project, please follow the steps below:
   - `backend/`
   - `backend/utility/`
 
+- You also need to add **Test users email address** to your Google Cloud console project
+
 ### 2. Clerk Authentication Setup
 - Create an account at [Clerk.dev](https://clerk.dev) and set up a new project.
 - Generate your **Clerk Secret Key** and a **JWT key**.
