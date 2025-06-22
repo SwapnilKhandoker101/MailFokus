@@ -13,11 +13,16 @@ import theme from "./theme";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import Models from "./pages/Models";
+import Security from "./pages/Security";
+import Settings from "./pages/Settings";
 import ClerkProviderWithRoutes from "./auth/ClerkProvider";
 import AuthenticationPage from "./auth/AuthenticationPage";
 import "./App.css";
 import { Home } from "@mui/icons-material";
 import Layout from "./pages/Layout";
+import { SignedOut } from "@clerk/clerk-react";
+import ClearEmailsOnSignOut from "./components/ClearEmailsOnSignOut";
 
 // Home/Landing Page Component
 const HomePage = () => {
@@ -53,19 +58,30 @@ const HomePage = () => {
   );
 };
 
+
+
+
 function App() {
+
+  
+
+
   return (
     <ClerkProviderWithRoutes>
+     <ClearEmailsOnSignOut/>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/sign-in/*" element={<AuthenticationPage />} />
         <Route path="/sign-up" element={<AuthenticationPage />} />
 
-        <Route element={<Layout/>}>
-        <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route element={<Layout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/models" element={<Models />} />
+          <Route path="/security" element={<Security />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
-
       </Routes>
     </ClerkProviderWithRoutes>
   );

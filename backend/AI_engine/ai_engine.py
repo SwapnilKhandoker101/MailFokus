@@ -17,11 +17,20 @@ class AI_engine:
 
 
         # classifier:
-        self.classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-        
+        # self.classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+        # self.classifier = pipeline("zero-shot-classification", model="valhalla/distilbart-mnli-12-1")
+
+        self.classifier = pipeline("zero-shot-classification", model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
 
         # name-entity-extraction:
-        self.ner_bert = pipeline("ner", model="dslim/bert-base-NER", aggregation_strategy="simple")
+        # self.ner_bert = pipeline("ner", model="dslim/bert-base-NER", aggregation_strategy="simple")
+
+        self.ner_bert = pipeline(
+    "ner",
+    model="Davlan/bert-base-multilingual-cased-ner-hrl",
+    tokenizer="Davlan/bert-base-multilingual-cased-ner-hrl",
+    aggregation_strategy="simple"
+)
 
 
     
@@ -31,7 +40,7 @@ class AI_engine:
         if input_tokens<142:
            return text
         
-        hint = "Summarize the email and make sure to include any dates, deadlines, or scheduled meetings.\n\n"
+        hint = "Summarize the email and make sure to include any dates, deadlines, or scheduled meetings.Give me important information in bullet points\n\n"
         augmented_text=hint+text
         
         
@@ -60,7 +69,7 @@ class AI_engine:
         # category=categorization_chain.invoke({'text':text})
 
         candidate_labels = ["meeting", "order", "invoice", "reminder", "event", "subscription", "security", "policy", "legal", "finance"]
-        category=self.classifier(text,candidate_labels)
+        category=self.classifier(text,candidate_labels,multi_label=False)
 
         return category
         
@@ -68,7 +77,7 @@ class AI_engine:
 
         entities=self.ner_bert(text)
 
-        return entities
+        return [(ent["word"], ent["entity_group"]) for ent in entities]
 
     
 

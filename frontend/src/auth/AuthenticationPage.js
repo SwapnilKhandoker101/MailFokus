@@ -13,7 +13,7 @@ const AuthenticationPage = () => {
         <div className="redirect-message">
           <p>You are already signed In</p>
         </div>
-        <Navigate to="/dashboard" replace />
+        <Navigate to="/login" replace />
       </SignedIn>
     </div>
   );

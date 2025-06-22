@@ -9,7 +9,8 @@ from http import HTTPStatus
 from googleapiclient.discovery import build
 import base64
 from bs4 import BeautifulSoup
-
+from transformers import pipeline
+import torch
 
 
 from google.auth.transport.requests import Request as GoogleAuthRequest
@@ -41,7 +42,7 @@ def authenticiate(user_id:str='test_user101'):
             else:
                 
                 flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)
-                creds = flow.run_local_server(port=8000)
+                creds = flow.run_local_server(port=0)
             with open(token_path, "w") as token:
                 token.write(creds.to_json())
         return creds
@@ -135,6 +136,7 @@ def get_message_details(service,user_id='me',max_results=10):
         parts = msg_detail['payload'].get('parts', [])
         payload = msg_detail['payload']
         label_ids = msg_detail.get('labelIds', [])
+        msg_id=msg['id']
 
         sender = subject = ""
         has_attachment = False
@@ -159,6 +161,7 @@ def get_message_details(service,user_id='me',max_results=10):
         email_body = get_formatted_email_body(parts if parts else [payload])
 
         results.append({
+            "gmail_id":msg_id,
             "sender": sender,
             "subject": subject,
             "label": label_ids,
@@ -269,5 +272,16 @@ def extract():
 
 
 
-if __name__ == "__main__":
-  extract()
+# if __name__ == "__main__":
+#   device = 0 if torch.cuda.is_available() else -1
+#   print(f"Device set to use {'GPU' if device == 0 else 'CPU'}")
+#   print("PyTorch version:", torch.__version__)
+#   print("CUDA available:", torch.cuda.is_available())
+#   print("CUDA version:", torch.version.cuda)
+
+#   classifier = pipeline("zero-shot-classification", model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli",device=device )
+#   sequence_to_classify = "Angela Merkel ist eine Politikerin in Deutschland und Vorsitzende der CDU"
+#   candidate_labels = ["politics", "economy", "entertainment", "environment"]
+#   output = classifier(sequence_to_classify, candidate_labels, multi_label=False)
+#   print(output)
+

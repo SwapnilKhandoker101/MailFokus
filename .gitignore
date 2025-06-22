@@ -3,20 +3,20 @@ venv/
 
 .env
 
-# # FastAPI/Uvicorn logs
-# *.log
+# FastAPI/Uvicorn logs
+*.log
 
-# # VS Code settings (if you use it)
-# .vscode/
+# VS Code settings (if you use it)
+.vscode/
 
-# # Jupyter Notebook checkpoints (just in case)
-# .ipynb_checkpoints/
+# Jupyter Notebook checkpoints (just in case)
+.ipynb_checkpoints/
 
-# # Node
-# frontend/node_modules/
-# frontend/.env
-# frontend/dist/
-# frontend/build/
+# Node
+frontend/node_modules/
+frontend/.env
+frontend/dist/
+frontend/build/
 
 
 
@@ -45,3 +45,16 @@ backend/user_tokens/
 database.db
 backend/database.db
 frontend/.env
+
+extra.js
+frontend/extra.js
+backend/extra.js
+
+token.txt
+backend/token.txt
+frontend/token.txt
+
+user_tokens
+frontend/user_tokens/
+frontend/public/robots.txt
+

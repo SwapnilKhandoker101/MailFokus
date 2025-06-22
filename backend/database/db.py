@@ -4,6 +4,7 @@ from . import models
 
 def create_email_into_db(
         db:Session,
+        gmail_id:str,
         sender:str,
         email_subject:str,
         original_email_label:str,
@@ -13,15 +14,25 @@ def create_email_into_db(
         named_entities:str,
         user_id:str
 ):
+    existing=db.query(models.EmailRecord).filter(
+        models.EmailRecord.gmail_id==gmail_id,
+        models.EmailRecord.user_id==user_id
+    ).first()
+
+    if existing:
+        return existing
+
+
     db_emails=models.EmailRecord(
+        gmail_id=gmail_id,
         sender=sender,
         email_subject=email_subject,
         original_email_label=original_email_label,
         original_email=original_email,
-        summay=summary,
+        summary=summary,
         category=category,
         named_entities=named_entities,
-        created_by=user_id
+        user_id=user_id
     )
 
     db.add(db_emails)
@@ -29,18 +40,22 @@ def create_email_into_db(
     db.refresh(db_emails)
     return db_emails
 
+
+
+
+
 def get_emails_from_db(db:Session,user_id:str):
-    return db.query(models.EmailRecord).filter(models.EmailRecord.created_by==user_id).all()
+    return db.query(models.EmailRecord).filter(models.EmailRecord.user_id==user_id).all()
 
 
 def get_email_by_id_from_db(db:Session,user_id:str,email_id:int):
-    return db.query(models.EmailRecord).filter(models.EmailRecord.id==email_id,models.EmailRecord.created_by==user_id).first()
+    return db.query(models.EmailRecord).filter(models.EmailRecord.id==email_id,models.EmailRecord.user_id==user_id).first()
 
 
 def post_email_summary_by_id(db:Session,user_id:str,email_id:int,summary:str):
     email_record=db.query(models.EmailRecord).filter(
         models.EmailRecord.id==email_id,
-        models.EmailRecord.created_by==user_id
+        models.EmailRecord.user_id==user_id
     ).first()
 
     if email_record:
@@ -55,7 +70,7 @@ def post_email_summary_by_id(db:Session,user_id:str,email_id:int,summary:str):
 def post_email_categories_by_id(db:Session,user_id:str,email_id:int,category:str):
     email_record=db.query(models.EmailRecord).filter(
         models.EmailRecord.id==email_id,
-        models.EmailRecord.created_by==user_id
+        models.EmailRecord.user_id==user_id
     ).first()
 
     if email_record:
@@ -70,7 +85,7 @@ def post_email_categories_by_id(db:Session,user_id:str,email_id:int,category:str
 def post_email_named_entities_by_id(db:Session,user_id:str,email_id:int,namedEntities:str):
     email_record=db.query(models.EmailRecord).filter(
         models.EmailRecord.id==email_id,
-        models.EmailRecord.created_by==user_id
+        models.EmailRecord.user_id==user_id
     ).first()
 
     if email_record:

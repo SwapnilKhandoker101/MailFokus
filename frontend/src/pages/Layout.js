@@ -72,11 +72,11 @@ const Layout = () => {
             />
           </SearchContainer> */}
 
-          <nav>
+          {/* <nav>
             <SignedIn>
               <UserButton></UserButton>
             </SignedIn>
-          </nav>
+          </nav> */}
         </div>
       </header>
 
