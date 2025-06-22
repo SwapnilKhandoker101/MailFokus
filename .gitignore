@@ -18,6 +18,10 @@ frontend/.env
 frontend/dist/
 frontend/build/
 
+**/__pycache__
+backend/__pycache__
+
+
 
 
 # Windows
