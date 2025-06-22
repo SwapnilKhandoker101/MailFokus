@@ -1,6 +1,6 @@
 # 📧 MailFokus
 
-Welcome to the **MailFokus** project — a smart email analysis tool designed to help you gain insights from your Gmail inbox.
+Welcome to the **MailFokus** project — a smart AI-powered email analysis tool designed to help you gain insights from your Gmail inbox.
 
 
 With MailFokus, you can:
