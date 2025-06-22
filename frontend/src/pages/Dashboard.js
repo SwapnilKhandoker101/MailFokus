@@ -801,7 +801,7 @@ const Dashboard = () => {
                       {email.email_subject}
                     </Typography>
                     <Chip
-                      label={`${getEntityCount(email.named_entities)} entities`}
+                      label={`${getEntityCount(email.named_entities)/2} entities`}
                       size="small"
                       sx={{
                         backgroundColor: "#9C27B0",
@@ -1051,7 +1051,7 @@ const Dashboard = () => {
                       <Chip
                         label={`${getEntityCount(
                           email.named_entities
-                        )} `}
+                        )/2} `}
                         size="small"
                         variant="outlined"
                         sx={{ fontSize: "0.7rem" }}
