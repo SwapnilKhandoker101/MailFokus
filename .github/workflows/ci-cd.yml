@@ -39,9 +39,7 @@ jobs:
           sleep 8
           curl http://127.0.0.1:8000 || echo "Server started"
 
-  # ==========================
-  # FRONTEND JOB
-  # ==========================
+
   frontend:
     runs-on: ubuntu-latest
     defaults:
