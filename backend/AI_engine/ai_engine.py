@@ -2,7 +2,7 @@ from transformers import pipeline,AutoTokenizer, AutoModelForSeq2SeqLM,set_seed
 import torch
 from langchain_huggingface import HuggingFacePipeline
 from langchain.prompts import PromptTemplate
-from summarizer import Summarizer
+from summarizer import Summarizerd
 
 
 
